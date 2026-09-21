@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bridge Drill — Partnerlik Antrenmanı</title>
+<style>
+:root{
+  --bg:#f6f7fb; --card:#fff; --ink:#1c2333; --muted:#5b6478;
+  --accent:#2456d6; --ok:#1a7f37; --bad:#c0392b; --line:#d8dde8;
+  --chip:#eef2fa; --warn:#b7791f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.45;
+}
+#app{max-width:640px;margin:0 auto;padding:12px 12px 40px}
+h1{font-size:20px;margin:8px 0}
+h2{font-size:16px;margin:16px 0 8px}
+button{
+  font:inherit; min-height:44px; min-width:44px; border:1px solid var(--line);
+  background:#fff; border-radius:10px; padding:8px 12px; cursor:pointer;
+}
+button:active{transform:translateY(1px)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button.grade{flex:1;font-size:15px}
+.muted{color:var(--muted);font-size:13px}
+.hidden{display:none !important}
+.statbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;flex:1;min-width:80px;text-align:center}
+.stat b{display:block;font-size:20px}
+.stat span{font-size:12px;color:var(--muted)}
+.deckrow{
+  display:flex;align-items:center;gap:8px;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;
+}
+.deckrow .name{flex:1;font-weight:600}
+.deckrow select{min-height:44px;border:1px solid var(--line);border-radius:8px;padding:6px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0}
+/* Auction table: seats around an imaginary table (you at bottom, partner top,
+   opponents left/right). Calls carry small numbers = bid order (clockwise). */
+.table{display:grid;grid-template-columns:1fr minmax(72px,auto) 1fr;grid-template-rows:auto auto auto;gap:10px;margin:12px auto 12px;max-width:420px}
+.tseat{border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:#fbfcfe;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center}
+.tseat .who{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.3px}
+.tseat .who .tag{font-size:10px;font-weight:800;padding:1px 5px;border-radius:5px;margin-left:4px;vertical-align:middle}
+.tseat.you{background:#eef3ff;border-color:var(--accent)}
+.tseat.you .who{color:var(--accent)}
+.tseat.you .who .tag{background:var(--accent);color:#fff}
+.tseat.partner .who .tag{background:#eef3ff;color:var(--accent);border:1px solid var(--accent)}
+.tseat.top{grid-column:2;grid-row:1;align-self:end}
+.tseat.left{grid-column:1;grid-row:2;align-self:center;align-items:flex-end}
+.tseat.right{grid-column:3;grid-row:2;align-self:center;align-items:flex-start}
+.tseat.bottom{grid-column:2;grid-row:3;align-self:start}
+.bidrow{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.bid{display:inline-flex;align-items:center;gap:3px;background:#fff;border:1px solid var(--line);border-radius:7px;padding:2px 6px;font-size:16px;font-weight:700}
+.bid .n{font-size:9px;font-weight:800;color:var(--muted);background:var(--chip);border-radius:4px;padding:0 3px}
+.bid.q{border-color:var(--accent);background:#eaf0ff}
+.bid.q .qm{color:var(--accent);font-size:20px;font-weight:800}
+.bid.pas{color:var(--muted);font-weight:600;font-style:italic}
+.leadbox{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fbfcfe}
+.leadbox .lbl{font-size:11px;font-weight:700;color:var(--muted)}
+.leadbox .calls{font-size:16px;font-weight:600;margin-top:2px;word-break:break-word}
+.leadbox .calls .q{color:var(--accent)}
+.tlegend{max-width:420px;margin:0 auto;font-size:11px;color:var(--muted);text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{background:var(--chip);border-radius:999px;padding:4px 10px;font-size:13px}
+.chip b{font-weight:600}
+.answerline{display:flex;gap:8px;margin:10px 0}
+.answerline input{
+  flex:1;font:inherit;font-size:18px;min-height:44px;padding:8px 12px;
+  border:1px solid var(--line);border-radius:10px;text-transform:lowercase;
+}
+.banner{border-radius:10px;padding:10px 12px;margin:10px 0;font-size:15px}
+.banner.ok{background:#e6f4ea;color:var(--ok)}
+.banner.bad{background:#fdeceb;color:var(--bad)}
+.rule{background:#f2f5fb;border-left:4px solid var(--accent);border-radius:6px;padding:10px 12px;margin:10px 0;font-size:14px}
+.src{font-size:12px;color:var(--muted);margin:4px 0 10px}
+.gradeline{display:flex;gap:8px}
+.topbar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.topbar .grow{flex:1}
+.list{list-style:none;padding:0;margin:0}
+.list li{padding:10px 0;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:none}
+.tag{display:inline-block;background:var(--chip);border-radius:6px;padding:1px 6px;font-size:11px;color:var(--muted);margin-right:4px}
+table.sum{width:100%;border-collapse:collapse;margin:8px 0}
+table.sum td,table.sum th{border:1px solid var(--line);padding:6px 8px;font-size:14px;text-align:left}
+footer{margin-top:24px;font-size:12px;color:var(--muted);text-align:center}
+@media (max-width:375px){
+  #app{padding:8px 8px 32px}
+  .stat b{font-size:17px}
+  .answerline input{font-size:16px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <section id="screen-home">
+    <h1>Bridge Drill <span class="muted">partnerlik kuralı tekrarı</span></h1>
+    <div class="statbar">
+      <div class="stat"><b id="st-due">0</b><span>Sıradaki / due</span></div>
+      <div class="stat"><b id="st-new">0</b><span>Yeni / new</span></div>
+      <div class="stat"><b id="st-learned">0</b><span>Öğrenilen</span></div>
+      <div class="stat"><b id="st-streak">0</b><span>Günlük seri</span></div>
+    </div>
+    <div class="panel">
+      <h2 style="margin-top:0">Desteler / decks</h2>
+      <div class="deckrow">
+        <select id="deck-filter" aria-label="Deste seç">
+          <option value="all">Tümü / all</option>
+        </select>
+        <button id="btn-start" class="primary">Oturum başlat</button>
+      </div>
+      <p class="muted">Oturum: sıradaki tekrarlar + en fazla 5 yeni kart, ~10 cevapta biter.</p>
+    </div>
+    <div class="panel">
+      <h2 style="margin-top:0">Diğer / more</h2>
+      <button id="btn-questions" style="width:100%">Kaynak soruları / review questions</button>
+      <p style="height:8px"></p>
+      <button id="btn-data" style="width:100%">Veri / data (içeri dışa aktar, sıfırla)</button>
+    </div>
+    <div id="home-tests" class="hidden" style="background:#fdeceb;color:var(--bad);border-radius:10px;padding:10px;font-size:13px"></div>
+    <footer>BricS3Y4E_vT.html · yerel çalışma, ilerleme bu cihazda saklanır</footer>
+  </section>
+
+  <!-- CARD -->
+  <section id="screen-card" class="hidden">
+    <div class="topbar">
+      <button id="btn-exit" aria-label="Çık">←</button>
+      <div class="grow muted" id="card-progress"></div>
+    </div>
+    <div class="panel">
+      <div id="card-deck" class="tag"></div>
+      <div id="card-auction" class="auction"></div>
+      <div id="card-prompt-extra"></div>
+      <div id="card-chips" class="chips"></div>
+      <div id="card-context" class="muted" style="margin:6px 0"></div>
+      <div class="answerline">
+        <input id="answer-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="cevabını yaz (Enter)">
+        <button id="btn-submit" class="primary">Cevapla</button>
+      </div>
+      <div id="card-feedback" class="hidden">
+        <div id="fb-banner" class="banner"></div>
+        <div id="fb-rule" class="rule"></div>
+        <div id="fb-src" class="src"></div>
+        <div class="gradeline" id="grade-buttons"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section id="screen-summary" class="hidden">
+    <h1>Oturum sonu</h1>
+    <div class="panel">
+      <div id="summary-body"></div>
+      <button id="btn-home" class="primary" style="width:100%;margin-top:10px">Ana ekran</button>
+    </div>
+  </section>
+
+  <!-- QUESTIONS / REVIEW -->
+  <section id="screen-questions" class="hidden">
+    <div class="topbar">
+      <button id="btn-q-home" aria-label="Geri">←</button>
+      <h1 style="margin:0;font-size:18px">Kaynak soruları</h1>
+    </div>
+    <div class="panel">
+      <h2 style="margin-top:0">Çözülmemiş kaynak soruları</h2>
+      <ul class="list" id="questions-list"></ul>
+      <h2>İnceleme bekleyen kartlar</h2>
+      <ul class="list" id="review-cards"></ul>
+    </div>
+  </section>
+
+  <!-- DATA -->
+  <section id="screen-data" class="hidden">
+    <div class="topbar">
+      <button id="btn-d-home" aria-label="Geri">←</button>
+      <h1 style="margin:0;font-size:18px">Veri</h1>
+    </div>
+    <div class="panel">
+      <button id="btn-export" style="width:100%">İlerlemeyi dışa aktar (JSON)</button>
+      <p style="height:8px"></p>
+      <label style="display:block;margin:6px 0">
+        <span class="muted">İçe aktar:</span><br>
+        <input type="file" id="file-import" accept="application/json">
+      </label>
+      <p id="import-msg" class="muted"></p>
+      <button id="btn-reset" class="danger" style="width:100%">Tüm ilerlemeyi sıfırla</button>
+    </div>
+  </section>
+
+</div>
+<script>
+"use strict";
+/* ===== M3: CARD DATA (30 verified, 10 per deck) ===== */
+const CARDS = [
+/* ---------- DECK 1: 1MJ-OA (1 major opened, next seat doubled) — Table 7 ---------- */
+{
+  id:"oa-rdbl",
+  deck:"1MJ-OA", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"X"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"10+ HP"},
+    context:"Ortak 1♠ açtı, Batı kontr dedi. Elinde 10+ HP var, tutuşu belli değil."
+  },
+  acceptedAnswers:["rdbl"], displayAnswer:"RDBL",
+  /* aliases: rdbl, xx (rd dropped to avoid collision with lead-card d) */
+  rule:"Redouble: 10+ HP, tutuş belli değil.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:2},
+  status:"verified", tags:["competitive","redouble"]
+},
+{
+  id:"oa-1sa",
+  deck:"1MJ-OA", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"X"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"6-10 HP"},
+    context:"Ortak 1♠ açtı, Batı kontr dedi. 6-10 HP elin var."
+  },
+  acceptedAnswers:["1nt"], displayAnswer:"1 SA",
+  rule:"1 SA: 6-10 HP.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:6},
+  status:"verified", tags:["competitive","notrump"]
+},
+{
+  id:"oa-2yr-weak",
+  deck:"1MJ-OA", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"X"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"6'lı ♦",strength:"zayıf el"},
+    context:"Ortak 1♥ açtı, Batı kontr dedi. Elinde 6'lı ♦ ve zayıf el var."
+  },
+  acceptedAnswers:["2d"], displayAnswer:"2♦",
+  rule:"2'li yeni renk: 6'lı renk, zayıf el.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:7},
+  status:"verified", tags:["competitive","weak"]
+},
+{
+  id:"oa-2mj-raise",
+  deck:"1MJ-OA", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"X"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"min 3'lü",tp:"6-10 TP"},
+    context:"Ortak 1♠ açtı, Batı kontr dedi. ♠'da min 3'lü tutuş, 6-10 TP var."
+  },
+  acceptedAnswers:["2s"], displayAnswer:"2♠",
+  rule:"2 MJ: en az 3'lü tutuş, 6-10 TP.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:8},
+  status:"verified", tags:["competitive","raise"]
+},
+{
+  id:"oa-2sa-truscott",
+  deck:"1MJ-OA", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"X"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"4'lü",tp:"9+ TP",shape:"dengeli"},
+    context:"Ortak 1♠ açtı, Batı kontr dedi. ♠'da 4'lü tutuş, 9+ TP, dengeli elin var."
+  },
+  acceptedAnswers:["2nt"], displayAnswer:"2 SA",
+  rule:"Truscott 2 SA: 4'lü tutuş, 9+ TP (davet+), DENGELİ el.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:11},
+  status:"verified", tags:["competitive","truscott","raise"]
+},
+{
+  id:"oa-3mj-preempt",
+  deck:"1MJ-OA", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"X"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"4'lü",tp:"0-5 TP",shape:"dengesiz"},
+    context:"Ortak 1♠ açtı, Batı kontr dedi. ♠'da 4'lü tutuş, 0-5 TP, dengesiz elin var."
+  },
+  acceptedAnswers:["3s"], displayAnswer:"3♠",
+  rule:"3 MJ: 4'lü tutuş, 0-5 TP, dengesiz el (preemptif).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:16},
+  status:"verified", tags:["competitive","preempt"]
+},
+{
+  id:"oa-trial-3mj",
+  deck:"1MJ-OA", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"X"},{seat:"N",call:"2♠"},{seat:"E",call:null},
+      {seat:"S",call:"3♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"4'lü",tp:"6-7 TP"},
+    context:"2♠'den sonra açan 3♦ trial bid yaptı. ♠'da 4'lü tutuş, 6-7 TP."
+  },
+  acceptedAnswers:["3s"], displayAnswer:"3♠",
+  rule:"Trial bid'e cevap: 6-7 TP ile 3 MJ.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:10},
+  status:"verified", tags:["competitive","trial","raise"]
+},
+{
+  id:"oa-2sa-truscott-meaning",
+  deck:"1MJ-OA", kind:"meaning", grading:"self",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"X"},{seat:"N",call:"2 SA"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    context:"Ortak 1♠ açtı, Batı kontr dedi, sen 2 SA okudun. Bu ne vaat eder?"
+  },
+  displayAnswer:"4'lü tutuş, 9+ TP, DENGELİ el (Truscott)",
+  rule:"Truscott 2 SA: 4'lü tutuş, 9+ TP (davet+), dengeli el.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:11},
+  status:"verified", tags:["competitive","truscott","meaning"]
+},
+{
+  id:"oa-truscott-vs-preempt",
+  deck:"1MJ-OA", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"X"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"4'lü",tp:"9+ TP",shape:"dengeli"},
+    context:"Ortak 1♥ açtı, Batı kontr dedi. 4'lü tutuş, 9+ TP, dengeli el. (İpucu: dengeli → ?; dengesiz 0-5 TP → preemptif)"
+  },
+  acceptedAnswers:["2nt"], displayAnswer:"2 SA",
+  rule:"Dengeli 9+ TP → Truscott 2 SA. (Dengesiz 0-5 TP olsaydı 3♥ preemptif olurdu.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:11},
+  status:"verified", tags:["competitive","truscott","contrast"]
+},
+{
+  id:"oa-rdbl-meaning",
+  deck:"1MJ-OA", kind:"meaning", grading:"self",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"X"},{seat:"N",call:"RDBL"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    context:"Ortak 1♠ açtı, Batı kontr dedi, sen RDBL okudun. Bu ne vaat eder?"
+  },
+  displayAnswer:"10+ HP, tutuş belli değil",
+  rule:"RDBL: 10+ HP, tutuş belli değil.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — DBL",table:7,row:2},
+  status:"verified", tags:["competitive","redouble","meaning"]
+},
+
+/* ---------- DECK 2: 1MJ-CLEAN (1 major opened, no interference) — Table 1 + Table 4 ---------- */
+{
+  id:"clean-1sa",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"6-11 HP"},
+    context:"Ortak 1♠ açtı, Batı pas geçti. 6-11 HP elin var, tutuş belli değil."
+  },
+  acceptedAnswers:["1nt"], displayAnswer:"1 SA",
+  rule:"Semi-forcing 1 SA: 6-11 HP, tutuş belli değil.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:2},
+  status:"verified", tags:["clean","notrump","semi-forcing"]
+},
+{
+  id:"clean-2mn-2over1",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5'li ♦ (min 3'lü tutuş)",strength:"12+ HP"},
+    context:"Ortak 1♥ açtı, Batı pas geçti. 5'li ♦ var, 12+ HP elin var."
+  },
+  acceptedAnswers:["2d"], displayAnswer:"2♦",
+  rule:"Two-over-one: min 3'lü tutuş, 12+ HP. 3'lü bile olsa önce minor okunur. Game forcing.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:3},
+  status:"verified", tags:["clean","2over1"]
+},
+{
+  id:"clean-2mj-raise",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"min 3'lü",tp:"8-10 TP"},
+    context:"Ortak 1♠ açtı, Batı pas geçti. ♠'da min 3'lü tutuş, 8-10 TP."
+  },
+  acceptedAnswers:["2s"], displayAnswer:"2♠",
+  rule:"2 MJ: min 3'lü tutuş, 8-10 TP (yapıcı / constructive raise).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:4},
+  status:"verified", tags:["clean","raise"]
+},
+{
+  id:"clean-2sa-jacoby",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"4'lü",strength:"12+ HP",note:"splinter yok, iyi 5'li renk yok"},
+    context:"Ortak 1♥ açtı, Batı pas geçti. ♥'da 4'lü tutuş, 12+ HP, single yok, iyi 5'li renk yok."
+  },
+  acceptedAnswers:["2nt"], displayAnswer:"2 SA",
+  rule:"Jacoby 2 SA (original): 12+ HP, 4'lü tutuş, zone forcing, muhtemelen single yok (olsa splinter yapardın).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:5},
+  status:"verified", tags:["clean","jacoby"]
+},
+{
+  id:"clean-3mj-preempt",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"4'lü",strength:"3-5 HP",shape:"dengesiz"},
+    context:"Ortak 1♠ açtı, Batı pas geçti. ♠'da 4'lü tutuş, 3-5 HP, dengesiz el."
+  },
+  acceptedAnswers:["3s"], displayAnswer:"3♠",
+  rule:"3 MJ: 4'lü tutuş, blokatif 3-5 HP, dengesiz el.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:6},
+  status:"verified", tags:["clean","preempt"]
+},
+{
+  id:"clean-4mj-preempt",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"4'lü",strength:"3-5 HP",shape:"çok dengesiz"},
+    context:"Ortak 1♠ açtı, Batı pas geçti. ♠'da 4'lü tutuş, 3-5 HP, ÇOK dengesiz el."
+  },
+  acceptedAnswers:["4s"], displayAnswer:"4♠",
+  rule:"4 MJ: 4'lü tutuş, blokatif 3-5 HP, ÇOK dengesiz el.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:7},
+  status:"verified", tags:["clean","preempt"]
+},
+{
+  id:"clean-splinter",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{trump:"4+ ♠",strength:"11-14 HP",shape:"♦ singleton/void"},
+    context:"Ortak 1♠ açtı, Batı pas geçti. 4+ ♠ (koz), 11-14 HP, ♦'de singleton veya void."
+  },
+  acceptedAnswers:["4d"], displayAnswer:"4♦",
+  rule:"Splinter: 11-14 HP, en az 4'lü koz, okunan renk singleton veya void.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:8},
+  status:"verified", tags:["clean","splinter"]
+},
+{
+  id:"clean-jacoby-4mj-reply",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"PAS"},{seat:"N",call:"2 SA"},{seat:"E",call:null},
+      {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"S",
+    hand:{strength:"11-12 HP",note:"min el"},
+    context:"Ortak 1♥ açtı, 2 SA Jacoby yaptı. Senin açan olarak min el (11-12 HP) var. Ne okursun?"
+  },
+  acceptedAnswers:["4h"], displayAnswer:"4♥",
+  rule:"Jacoby'den sonra açan: 4 MJ = min el 11-12 HP.",
+  source:{file:"BricS3Y4E_vT.html",section:"JACOBY 2SA — original",table:4,row:3},
+  status:"verified", tags:["clean","jacoby","opener"]
+},
+{
+  id:"clean-2sa-jacoby-meaning",
+  deck:"1MJ-CLEAN", kind:"meaning", grading:"self",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"PAS"},{seat:"N",call:"2 SA"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    context:"Ortak 1♥ açtı, Batı pas geçti, sen 2 SA okudun. Bu ne vaat eder?"
+  },
+  displayAnswer:"12+ HP, 4'lü tutuş, zone forcing, muhtemelen single yok (Jacoby)",
+  rule:"Jacoby 2 SA (original): 12+ HP, 4'lü tutuş, zone forcing, muhtemelen single yok (olsa splinter yapardın), iyi 5'li renk yok (olsa 2'li yeni renk okurdun).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:5},
+  status:"verified", tags:["clean","jacoby","meaning"]
+},
+{
+  id:"clean-3mj-vs-4mj",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"4'lü",strength:"3-5 HP",shape:"çok dengesiz"},
+    context:"Ortak 1♠ açtı, Batı pas geçti. ♠'da 4'lü tutuş, 3-5 HP, elin ÇOK dengesiz. (İpucu: dengesiz → 3; ÇOK dengesiz → 4)"
+  },
+  acceptedAnswers:["4s"], displayAnswer:"4♠",
+  rule:"Çok dengesiz el → 4 MJ blokatif. (Dengesiz olsaydı 3 MJ olurdu.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:7},
+  status:"verified", tags:["clean","preempt","contrast"]
+}
+];
+
+/* ---------- DECK 3: LEADS — ÇIKIŞLAR block (plain text) ---------- */
+CARDS.push(
+{
+  id:"lead-trump-35",
+  deck:"LEADS", kind:"meaning", grading:"self",
+  prompt:{ contract:"koz kontratı", holding:"uzun renk" },
+  displayAnswer:"3. veya 5. kart",
+  rule:"Koz kontratına karşı: 3. veya 5. çıkılır.",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — KOZ KONTRATINA KARŞI"},
+  status:"verified", tags:["lead","trump","meaning"]
+},
+{
+  id:"lead-nt-4best",
+  deck:"LEADS", kind:"lead", grading:"exact",
+  prompt:{ contract:"3 SA", holding:"♣: K 9 7 4 2" },
+  acceptedAnswers:["4"], displayAnswer:"♣4",
+  rule:"SA'ya karşı uzun rengin 4.'sü çıkılır (5'li ve üzeri).",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — SA'YA KARŞI"},
+  status:"verified", tags:["lead","notrump","4best"]
+},
+{
+  id:"lead-nt-4card-2nd",
+  deck:"LEADS", kind:"lead", grading:"exact",
+  prompt:{ contract:"3 SA", holding:"♦: Q 9 6 3" },
+  acceptedAnswers:["9"], displayAnswer:"♦9",
+  rule:"SA'ya karşı 4'lü renkten 2.'si çıkılır.",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — SA'YA KARŞI"},
+  status:"verified", tags:["lead","notrump","4card"]
+},
+{
+  id:"lead-nt-partner-3rd",
+  deck:"LEADS", kind:"lead", grading:"exact",
+  prompt:{ contract:"3 SA", partnerSuit:"♠", holding:"♠: 10 7 4" },
+  acceptedAnswers:["7"], displayAnswer:"♠7",
+  rule:"SA'ya karşı ortağın rengiNE 3.'sü çıkılır.",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — SA'YA KARŞI"},
+  status:"verified", tags:["lead","notrump","partnersuit"]
+},
+{
+  id:"lead-nt-ace-ARxx",
+  deck:"LEADS", kind:"lead", grading:"exact",
+  prompt:{ contract:"3 SA", holding:"♥: A R x x" },
+  acceptedAnswers:["a"], displayAnswer:"♥A",
+  rule:"SA'ya karşı A çıkışı ARx veya ARxx belirtir.",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — SA'YA KARŞI"},
+  status:"verified", tags:["lead","notrump","ace"]
+},
+{
+  id:"lead-nt-ace-ARxxx",
+  deck:"LEADS", kind:"lead", grading:"exact",
+  prompt:{ contract:"3 SA", holding:"♥: A R 9 6 4" },
+  acceptedAnswers:["4"], displayAnswer:"♥4",
+  rule:"ARxxx ise 4. kart çıkılır (A'lı 5'liden 4.'sü).",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — SA'YA KARŞI"},
+  status:"verified", tags:["lead","notrump","ace","contrast"]
+},
+{
+  id:"lead-nt-king-strong",
+  deck:"LEADS", kind:"lead", grading:"exact",
+  prompt:{ contract:"3 SA", holding:"♣: A K J 10 9" },
+  acceptedAnswers:["r"], displayAnswer:"♣K",
+  rule:"R (K) çıkışı: kuvvetli honör ve min 5'li. AKJ10X / KD109X / AKJ9X'ten K çıkılır.",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — SA'YA KARŞI"},
+  status:"verified", tags:["lead","notrump","king"]
+},
+{
+  id:"lead-nt-109-meaning",
+  deck:"LEADS", kind:"meaning", grading:"self",
+  prompt:{ contract:"3 SA", holding:"10 veya 9 çıkışı gördün" },
+  displayAnswer:"Üstünde bir üstü, bir honör ve uzun renk var",
+  rule:"10,9 çıkışı: üstünde bir üstü, bir honör ve uzun renk var demektir.",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — SA'YA KARŞI"},
+  status:"verified", tags:["lead","notrump","meaning"]
+},
+{
+  id:"lead-trump-AR-seq",
+  deck:"LEADS", kind:"lead", grading:"exact",
+  prompt:{ contract:"4♥ (koz)", holding:"♠: A R x" },
+  acceptedAnswers:["r"], displayAnswer:"♠R",
+  rule:"KOZ kontratına karşı AR sekansından R çıkılır.",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — KOZ KONTRATINA KARŞI"},
+  status:"verified", tags:["lead","trump","sequence"]
+},
+{
+  id:"lead-trump-RD-seq",
+  deck:"LEADS", kind:"lead", grading:"exact",
+  prompt:{ contract:"4♥ (koz)", holding:"♠: R D x" },
+  acceptedAnswers:["d"], displayAnswer:"♠D",
+  rule:"KOZ kontratına karşı RD sekansından D çıkılır.",
+  source:{file:"BricS3Y4E_vT.html",section:"ÇIKIŞLAR — KOZ KONTRATINA KARŞI"},
+  status:"verified", tags:["lead","trump","sequence"]
+}
+);
+
+/* Source questions shown in review screen */
+const SOURCE_QUESTIONS = [
+  "1MJ + new-suit (Table 6) ve 1MJ + DBL (Table 7) tablolarında gambling 3 SA ile 4 MJ, el özellikleri (uzun MJ, 1 singleton + 1 doubleton) bakımından aynı tanımlanıyor; hangi durumda hangisinin seçileceği metinde ayrışmıyor. Bu ikili için kart oluşturulmadı.",
+  "Kaynakta yalnız 'JACOBY 2SA — ORIGINAL' bölümü var; 'modified' (değiştirilmiş) Jacoby için ayrı bir referans bulunamadı. Plan gereği yalnız ORIGINAL Jacoby kartları eklendi.",
+  "'Ortağın rengiNE FİT VARSA BÜYÜĞÜ ÇIK, EN BÜYÜK Q,J İSE ÇIKMA??' kaynağında soru işaretiyle belirsiz bırakılmış; bu yüzden ortağın rengiNE fit durumunda en büyük onörden çıkış kartı yapılmadı."
+];
+
+/* ===== M4: APP LOGIC ===== */
+const $ = (id) => document.getElementById(id);
+const STORAGE_KEY = "bridge-drill.progress.v1";
+const DECKS = ["1MJ-OA", "1MJ-CLEAN", "LEADS"];
+const SEATS_TR = { S:"Güney", W:"Batı", N:"Kuzey", E:"Doğu" };
+const SEAT_PARTNER = { S:"N", N:"S", W:"E", E:"W" };
+const SEAT_LHO = { S:"W", W:"N", N:"E", E:"S" }; // left-hand opponent
+const SEAT_RHO = { S:"E", E:"N", N:"W", W:"S" }; // right-hand opponent
+// Bidding order relative to a seat at the bottom: you -> LHO -> partner -> RHO.
+function tableLayout(userSeat){
+  return { bottom:userSeat, left:SEAT_LHO[userSeat], top:SEAT_PARTNER[userSeat], right:SEAT_RHO[userSeat] };
+}
+function bidOrder(userSeat){ const L=tableLayout(userSeat); return [L.bottom, L.left, L.top, L.right]; }
+
+/* ---------- Normalization ----------
+   Maps typed input -> canonical token. No unrestricted global replaces:
+   suit symbols -> letters, then a fixed alias table applied in a fixed order.
+*/
+function normalizeCall(raw){
+  if(raw == null) return null;
+  let s = String(raw).trim().toLowerCase();
+  if(!s) return null;
+  // suit symbols -> canonical letters
+  const sym = {"\u2663":"c","\u2665":"h","\u2660":"s","\u2666":"d"};
+  s = s.replace(/[\u2663\u2665\u2660\u2666]/g, m => sym[m]);
+  // remove whitespace and common separators (level/suit boundary)
+  s = s.replace(/[\s\-_.]/g, "");
+  // redouble aliases (before dbl->x so rdbl survives)
+  s = s.replace(/^rd$/, "rdbl");
+  s = s.replace(/^xx$/, "rdbl");
+  // double aliases
+  s = s.replace(/^kontr$/, "x");
+  s = s.replace(/^dbl$/, "x");
+  // notrump alias (end-anchored so e.g. "2 MN"->"2mn" is NOT treated as 2NT)
+  s = s.replace(/^(\d)(sa|nt)$/, (m,l,st) => l + "nt");
+  // English suit names / abbreviations -> canonical letters
+  //   spade(sp) s, heart(he) h, diamond(di) d, club(cl) c
+  const suitName = { spade:"s", sp:"s", s:"s", heart:"h", he:"h", h:"h", diamond:"d", di:"d", d:"d", club:"c", cl:"c", c:"c" };
+  s = s.replace(/^(\d)(spade|sp|heart|he|diamond|di|club|cl|s|h|d|c)$/, (m,l,st) => l + suitName[st]);
+  // pass alias
+  s = s.replace(/^pass$/, "pas");
+  // ace alias for lead cards
+  s = s.replace(/^as$/, "a");
+  // king alias -> keep 'k'; matched to 'r' at compare stage
+  return s;
+}
+// Compare typed string to a canonical token. king k<->r alias handled here.
+function matchAnswer(typed, canonical){
+  const t = normalizeCall(typed);
+  const c = normalizeCall(canonical);
+  if(t == null || c == null) return false;
+  if(t === c) return true;
+  if(t === "r" && c === "k") return true;   // typed K, want R
+  if(t === "k" && c === "r") return true;   // typed R, want K
+  return false;
+}
+function isCorrect(card, typed){
+  return (card.acceptedAnswers || []).some(a => matchAnswer(typed, a));
+}
+
+/* ---------- Self-tests ---------- */
+function runSelfTests(){
+  const cases = [
+    ["2 SA", "2nt", true],
+    ["2nt", "2nt", true],
+    ["2NT", "2nt", true],
+    [" 2 sa ", "2nt", true],
+    ["X", "x", true],
+    ["dbl", "x", true],
+    ["kontr", "x", true],
+    ["RDBL", "rdbl", true],
+    ["xx", "rdbl", true],
+    ["\u26602", "2s", false], // suit symbol before number is not a valid call
+    ["2\u2660", "2s", true],  // 2♠
+    ["2s", "2s", true],
+    ["4\u2666", "4d", true],  // 4♦
+    ["2sp", "2s", true],      // 2 sp (spade)
+    ["2spade", "2s", true],   // 2 spade
+    ["3he", "3h", true],      // 3 he (heart)
+    ["3heart", "3h", true],   // 3 heart
+    ["4di", "4d", true],      // 4 di (diamond)
+    ["4diamond", "4d", true], // 4 diamond
+    ["2cl", "2c", true],      // 2 cl (club)
+    ["2club", "2c", true],    // 2 club
+    ["A", "a", true],          // ace lead alias
+    ["pas", "pas", true],
+    ["K", "r", true],
+    ["R", "r", true],
+    ["D", "d", true],
+    ["3h", "3h", true],
+    ["2nt", "3s", false],
+    ["garbage", "2s", false],
+    ["", "2s", false],
+    ["2sx", "2s", false]      // trailing junk -> reject
+  ];
+  let ok = 0, fail = 0;
+  const fails = [];
+  for(const [t, c, want] of cases){
+    const got = matchAnswer(t, c);
+    if(got === want) ok++; else { fail++; fails.push(t + " vs " + c + ": want " + want + " got " + got); }
+  }
+  return { ok, fail, fails };
+}
+
+/* ---------- Scheduler ---------- */
+function newProgress(){ return { phase:"new", intervalDays:0, reps:0, due:0, lapseCount:0, lastReviewed:0, reviews:0 }; }
+const MINUTE = 60000, HOUR = 3600000, DAY = 86400000;
+function schedule(card, prog, grade, now){
+  const p = { ...prog };
+  p.lastReviewed = now;
+  if(grade === "again"){
+    p.phase = "learning"; p.reps = 0; p.lapseCount += 1;
+    p.intervalDays = 0; p.due = now + 2*MINUTE;
+    return p;
+  }
+  if(p.phase === "new" || p.phase === "learning"){
+    const mins = grade === "hard" ? 6*60 : grade === "good" ? 24*60 : 10*24*60;
+    p.intervalDays = mins/1440; p.due = now + mins*MINUTE;
+    p.reps += 1;
+    if(p.reps >= 2) p.phase = "review";
+    return p;
+  }
+  // review phase
+  let days;
+  const cur = p.intervalDays || 0;
+  if(grade === "hard") days = Math.max(1, cur*1.2);
+  else if(grade === "easy") days = Math.max(10, cur*3);
+  else { // good
+    if(cur < 3) days = 3;
+    else if(cur < 7) days = 7;
+    else if(cur < 14) days = 14;
+    else days = cur*2.1;
+  }
+  days = Math.max(1, Math.round(days));
+  p.intervalDays = days; p.due = now + days*DAY; p.reps += 1; p.reviews += 1;
+  p.phase = "review";
+  return p;
+}
+
+/* ---------- Persistence ---------- */
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return { cards:{}, streak:{ lastDay:null, count:0 } };
+    const data = JSON.parse(raw);
+    if(typeof data !== "object" || data === null) throw new Error("bad");
+    if(typeof data.cards !== "object") data.cards = {};
+    return data;
+  }catch(e){ return { cards:{}, streak:{ lastDay:null, count:0 }, _corrupt:true }; }
+}
+function saveProgress(data){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){} }
+let DATA = loadProgress();
+
+/* ---------- Streak ---------- */
+function todayStr(now){ const d=new Date(now); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function touchStreak(now){
+  const t = todayStr(now);
+  const s = DATA.streak || (DATA.streak = { lastDay:null, count:0 });
+  if(s.lastDay === t) return;
+  const yest = todayStr(now - DAY);
+  s.count = (s.lastDay === yest) ? s.count + 1 : 1;
+  s.lastDay = t;
+}
+
+/* ---------- Session ---------- */
+let session = { deck:"all", queue:[], i:0, stats:{ answered:0, firstCorrect:0, perDeck:{} }, againBuffer:[] };
+function activeCards(deck){
+  return CARDS.filter(c => c.status === "verified" && (deck === "all" || c.deck === deck));
+}
+function shuffle(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function buildQueue(deck){
+  const now = Date.now();
+  const cards = activeCards(deck);
+  const due = [], fresh = [];
+  for(const c of cards){
+    const p = DATA.cards[c.id];
+    if(!p || p.phase === "new") fresh.push(c);
+    else if(p.due && p.due <= now) due.push(c);
+  }
+  // Randomize WHICH cards are chosen (not just their order): shuffle first,
+  // then take due reviews (cap ~10) + up to 5 new, and present in random order.
+  const duePart = shuffle(due).slice(0, 10);
+  const newPart = shuffle(fresh).slice(0, 5);
+  session.queue = shuffle(duePart.concat(newPart));
+  session.i = 0;
+  session.againBuffer = [];
+  session.stats = { answered:0, firstCorrect:0, perDeck:{} };
+}
+function currentCard(){ return session.queue[session.i]; }
+
+/* ---------- Rendering ---------- */
+function counts(deck){
+  const now = Date.now();
+  let due=0, neu=0, learned=0;
+  for(const c of activeCards(deck)){
+    const p = DATA.cards[c.id];
+    if(!p || p.phase === "new") neu++;
+    else if(p.due && p.due <= now) due++;
+    if(p && (p.reviews || 0) >= 2) learned++;
+  }
+  return { due, neu, learned };
+}
+function renderHome(){
+  const c = counts(session.deck);
+  $("st-due").textContent = c.due;
+  $("st-new").textContent = c.neu;
+  $("st-learned").textContent = c.learned;
+  $("st-streak").textContent = (DATA.streak && DATA.streak.count) || 0;
+  const sel = $("deck-filter");
+  const keep = sel.value;
+  sel.innerHTML = '<option value="all">Tümü / all</option>' +
+    DECKS.map(d => `<option value="${d}">${d}</option>`).join("");
+  sel.value = keep && ["all",...DECKS].includes(keep) ? keep : "all";
+  const t = runSelfTests();
+  const box = $("home-tests");
+  if(t.fail > 0){ box.classList.remove("hidden"); box.textContent = "Self-test FAILED: " + t.fails.join("; "); }
+  else { box.classList.add("hidden"); }
+}
+function renderCard(){
+  const card = currentCard();
+  if(!card){ finishSession(); return; }
+  $("card-deck").textContent = card.deck + (card.kind !== "bid" ? " · " + card.kind : "");
+  $("card-progress").textContent = `Kart ${session.i+1} / ${session.queue.length}`;
+  const au = $("card-auction"); au.innerHTML = "";
+  if(card.prompt.auction){
+    au.className = "table-wrap";
+    const userSeat = card.prompt.userSeat;
+    const layout = tableLayout(userSeat);
+    const partnerSeat = layout.top;
+    // Assign each chronological call a sequence number and its seat.
+    const bySeat = { bottom:[], left:[], top:[], right:[] };
+    const seatPos = {};
+    for(const p of ["bottom","left","top","right"]) seatPos[layout[p]] = p;
+    let n = 0;
+    for(const st of card.prompt.auction){
+      if(st.call == null) continue;
+      n++;
+      const pos = seatPos[st.seat] || "bottom";
+      bySeat[pos].push({ call: st.call, n });
+    }
+    const table = document.createElement("div"); table.className = "table";
+    const order = [["top",layout.top],["left",layout.left],["right",layout.right],["bottom",layout.bottom]];
+    for(const [key, seat] of order){
+      const isYou = seat === userSeat;
+      const isPartner = seat === partnerSeat;
+      const div = document.createElement("div");
+      div.className = "tseat " + key + (isYou?" you":"") + (isPartner?" partner":"");
+      const who = document.createElement("div"); who.className = "who";
+      let tag = "";
+      if(isYou) tag = '<span class="tag">SEN</span>';
+      else if(isPartner) tag = '<span class="tag">ORTAK</span>';
+      who.innerHTML = SEATS_TR[seat] + tag;
+      div.appendChild(who);
+      const row = document.createElement("div"); row.className = "bidrow";
+      for(const b of bySeat[key] || []){
+        const bid = document.createElement("span");
+        if(b.call === "?"){
+          bid.className = "bid q";
+          bid.innerHTML = '<span class="n">' + b.n + '</span><span class="qm">?</span>';
+        } else {
+          bid.className = "bid" + (String(b.call).toLowerCase() === "pas" ? " pas" : "");
+          bid.innerHTML = '<span class="n">' + b.n + '</span>' + escapeHtml(b.call);
+        }
+        row.appendChild(bid);
+      }
+      if(!(bySeat[key] && bySeat[key].length)) row.innerHTML = '<span class="muted">—</span>';
+      div.appendChild(row);
+      table.appendChild(div);
+    }
+    au.appendChild(table);
+    const legend = document.createElement("div"); legend.className = "tlegend";
+    legend.textContent = "Sıra: sen \u2192 solun \u2192 ortağın \u2192 sağın (saat yönünde). Numaralar okuma sırası.";
+    au.appendChild(legend);
+  } else {
+    const div = document.createElement("div"); div.className = "leadbox";
+    const ps = card.prompt.partnerSuit ? ` · ortağın rengi: ${escapeHtml(card.prompt.partnerSuit)}` : "";
+    div.innerHTML = `<div class="lbl">Kontrat / holding</div><div class="calls">${escapeHtml(card.prompt.contract||"")}${ps}<br><span class="q">${escapeHtml(card.prompt.holding||"")}</span></div>`;
+    au.appendChild(div);
+  }
+  const ch = $("card-chips"); ch.innerHTML = "";
+  if(card.prompt.hand){
+    for(const [k,v] of Object.entries(card.prompt.hand)){
+      const span = document.createElement("span"); span.className = "chip"; span.innerHTML = `<b>${escapeHtml(k)}:</b> ${escapeHtml(v)}`;
+      ch.appendChild(span);
+    }
+  }
+  $("card-context").textContent = card.prompt.context || "";
+  $("card-feedback").classList.add("hidden");
+  $("answer-input").value = "";
+  $("answer-input").placeholder = card.kind === "lead" ? "çıkış kartını yaz (örn r, d, 4)" : "cevabını yaz (örn 2sp, 3he, 4di, 2cl, 2nt)";
+  $("btn-submit").textContent = card.grading === "self" ? "Göster" : "Cevapla";
+  setTimeout(()=>$("answer-input").focus(), 50);
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+
+function onAnswer(){
+  const card = currentCard(); if(!card) return;
+  const typed = $("answer-input").value;
+  $("card-feedback").classList.remove("hidden");
+  const banner = $("fb-banner");
+  $("fb-rule").textContent = card.rule;
+  $("fb-src").textContent = formatSrc(card.source);
+  if(card.grading === "self"){
+    // self-grade (meaning) cards count toward the session total but not first-attempt accuracy
+    session.stats.answered++;
+    const d = card.deck; session.stats.perDeck[d] = session.stats.perDeck[d] || {n:0, ok:0};
+    session.stats.perDeck[d].n++;
+    banner.className = "banner ok";
+    banner.innerHTML = `Doğru: <b>${escapeHtml(card.displayAnswer)}</b>${typed ? " · Senin: " + escapeHtml(typed) : ""}`;
+    showGrades(card, true);
+    return;
+  }
+  const correct = isCorrect(card, typed);
+  session.stats.answered++;
+  if(correct) session.stats.firstCorrect++;
+  const d = card.deck; session.stats.perDeck[d] = session.stats.perDeck[d] || {n:0, ok:0};
+  session.stats.perDeck[d].n++;
+  if(correct) session.stats.perDeck[d].ok++;
+  banner.className = "banner " + (correct ? "ok" : "bad");
+  if(correct){
+    banner.innerHTML = `✓ Doğru: <b>${escapeHtml(card.displayAnswer)}</b>`;
+    showGrades(card, true);
+  } else {
+    banner.innerHTML = `✗ Senin: <b>${escapeHtml(typed||"—")}</b> · Doğru: <b>${escapeHtml(card.displayAnswer)}</b>`;
+    showGrades(card, false);
+  }
+}
+function showGrades(card, correct){
+  const g = $("grade-buttons"); g.innerHTML = "";
+  let defs = correct
+    ? [["hard","2 zor"],["good","3 iyi"],["easy","4 kolay"]]
+    : [["again","1 tekrar"]];
+  if(card.grading === "self"){
+    defs = [["again","1 tekrar"],["hard","2 zor"],["good","3 iyi"],["easy","4 kolay"]];
+  }
+  for(const [key,label] of defs){
+    const b = document.createElement("button");
+    b.className = "grade";
+    b.textContent = label;
+    b.dataset.num = label.charAt(0); // leading digit = grade number (1/2/3/4)
+    b.onclick = () => grade(card, key);
+    g.appendChild(b);
+  }
+}
+function grade(card, gkey){
+  const now = Date.now();
+  const p = DATA.cards[card.id] || newProgress();
+  DATA.cards[card.id] = schedule(card, p, gkey, now);
+  touchStreak(now);
+  saveProgress(DATA);
+  if(gkey === "again") session.againBuffer.push(card.id);
+  next();
+}
+function next(){
+  if(session.againBuffer.length){
+    const insAt = Math.min(session.i + 1 + 2, session.queue.length);
+    const id = session.againBuffer.shift();
+    const card = CARDS.find(c => c.id === id);
+    if(card) session.queue.splice(insAt, 0, card);
+  }
+  session.i++;
+  const card = currentCard();
+  if(!card){ finishSession(); return; }
+  renderCard();
+}
+function finishSession(){
+  $("screen-card").classList.add("hidden");
+  $("screen-summary").classList.remove("hidden");
+  const s = session.stats;
+  const pct = s.answered ? Math.round(100*s.firstCorrect/s.answered) : 0;
+  $("summary-body").innerHTML =
+    `<p><b>Oturum özeti</b></p>` +
+    `<p>Cevaplanan kart: <b>${s.answered}</b> · İlk denemede doğru: <b>${pct}%</b></p>` +
+    perDeckRows(s) +
+    `<p class="muted">Sıradaki tekrar için zamanlayıcı ilerledi. Ana ekranda "Sıradaki / due" sayısına bak.</p>`;
+}
+function perDeckRows(s){
+  let out = `<table class="sum"><tr><th>Deste</th><th>İlk deneme doğru / kart</th><th>Oran</th></tr>`;
+  for(const d of DECKS){
+    const x = s.perDeck[d]; if(!x) continue;
+    const p = x.n ? Math.round(100*x.ok/x.n) : 0;
+    out += `<tr><td>${d}</td><td>${x.ok} / ${x.n}</td><td>${p}%</td></tr>`;
+  }
+  out += `</table>`;
+  return out;
+}
+function formatSrc(src){
+  if(!src) return "";
+  const parts = [src.section];
+  if(src.table) parts.push(`Tablo ${src.table}` + (src.row ? `, satır ${src.row}` : ""));
+  return parts.filter(Boolean).join(" · ");
+}
+
+/* ---------- Screen switching ---------- */
+const SCREENS = ["home","card","summary","questions","data"];
+function show(name){
+  for(const s of SCREENS) $("screen-"+s).classList.toggle("hidden", s !== name);
+  if(name === "home") renderHome();
+}
+
+/* ---------- Questions screen ---------- */
+function renderQuestions(){
+  const ql = $("questions-list"); ql.innerHTML = "";
+  for(const q of SOURCE_QUESTIONS){
+    const li = document.createElement("li"); li.textContent = q; ql.appendChild(li);
+  }
+  const rc = $("review-cards"); rc.innerHTML = "";
+  const pending = CARDS.filter(c => c.status === "needs-partnership-review" || c.status === "retired");
+  if(pending.length === 0){
+    const li = document.createElement("li");
+    li.textContent = "Şu anda inceleme bekleyen kart yok. Tüm 30 kart 'verified' durumda.";
+    rc.appendChild(li);
+  }
+  for(const c of pending){
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="tag">${c.status}</span> ${c.id}`;
+    rc.appendChild(li);
+  }
+}
+
+/* ---------- Data screen ---------- */
+function exportProgress(){
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = "bridge-drill-progress.json";
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function importProgress(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(typeof data !== "object" || data === null || typeof data.cards !== "object") throw new Error("bad shape");
+      DATA = data; saveProgress(DATA); $("import-msg").textContent = "İçe aktarıldı.";
+    }catch(e){ $("import-msg").textContent = "Geçersiz dosya: " + e.message; }
+  };
+  reader.readAsText(file);
+}
+function resetProgress(){
+  if(!confirm("Tüm ilerleme silinsin mi?")) return;
+  DATA = { cards:{}, streak:{ lastDay:null, count:0 } };
+  saveProgress(DATA); $("import-msg").textContent = "Sıfırlandı.";
+}
+
+/* ---------- Wiring ---------- */
+function init(){
+  if(DATA._corrupt){ DATA = { cards:{}, streak:{lastDay:null,count:0} }; saveProgress(DATA); }
+  $("btn-start").onclick = () => { buildQueue($("deck-filter").value); show("card"); renderCard(); };
+  $("btn-exit").onclick = () => show("home");
+  $("btn-submit").onclick = onAnswer;
+  $("answer-input").addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); onAnswer(); } });
+  document.addEventListener("keydown", e => {
+    if($("screen-card").classList.contains("hidden")) return;
+    if(e.key === "Escape"){ show("home"); return; }
+    if(!$("card-feedback").classList.contains("hidden")){
+      const num = parseInt(e.key,10);
+      if(!isNaN(num)){
+        const btns = Array.from($("grade-buttons").querySelectorAll("button"));
+        const match = btns.find(b => b.dataset.num == num);
+        if(match){ e.preventDefault(); match.click(); }
+      }
+    }
+  });
+  $("btn-questions").onclick = () => { renderQuestions(); show("questions"); };
+  $("btn-q-home").onclick = () => show("home");
+  $("btn-data").onclick = () => show("data");
+  $("btn-d-home").onclick = () => show("home");
+  $("btn-export").onclick = exportProgress;
+  $("file-import").onchange = e => { const f = e.target.files[0]; if(f) importProgress(f); };
+  $("btn-reset").onclick = resetProgress;
+  $("btn-home").onclick = () => show("home");
+  $("deck-filter").onchange = () => { session.deck = $("deck-filter").value; renderHome(); };
+  show("home");
+}
+document.addEventListener("DOMContentLoaded", init);
+
+</script>
+</body>
+</html>
