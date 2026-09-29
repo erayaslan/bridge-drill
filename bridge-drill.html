@@ -196,7 +196,7 @@ footer{margin-top:24px;font-size:12px;color:var(--muted);text-align:center}
 </div>
 <script>
 "use strict";
-/* ===== M3: CARD DATA (30 verified, 10 per deck) ===== */
+/* ===== M3: CARD DATA (40 verified: 10 each 1MJ-OA / 1MJ-CLEAN base / LEADS, +10 extra 1MJ-CLEAN) ===== */
 const CARDS = [
 /* ---------- DECK 1: 1MJ-OA (1 major opened, next seat doubled) — Table 7 ---------- */
 {
@@ -624,10 +624,181 @@ const SOURCE_QUESTIONS = [
   "'Ortağın rengiNE FİT VARSA BÜYÜĞÜ ÇIK, EN BÜYÜK Q,J İSE ÇIKMA??' kaynağında soru işaretiyle belirsiz bırakılmış; bu yüzden ortağın rengiNE fit durumunda en büyük onörden çıkış kartı yapılmadı."
 ];
 
+/* ===== M3 expansion: +10 cards 1MJ-CLEAN (1 MJ opened, no interference) — Tables 3, 9, 10 ===== */
+CARDS.push(
+{
+  id:"clean-raise-2mj",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"min 3'lü ♥",tp:"8-10 TP"},
+    context:"Ortak 1♥ açtı, Batı pas geçti. ♥'da min 3'lü tutuş, 8-10 TP. Yapıcı el."
+  },
+  acceptedAnswers:["2h"], displayAnswer:"2♥",
+  rule:"Basit yükseltme: min 3'lü tutuş, 8-10 TP.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:4},
+  status:"verified", tags:["clean","raise"]
+},
+{
+  id:"clean-raise-2mj-vs-3mj",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{support:"min 3'lü ♠",tp:"6-10 HP"},
+    context:"Ortak 1♠ açtı. ♠'da min 3'lü, 6-10 HP, 11+ yok. (Blokaj değil.)"
+  },
+  acceptedAnswers:["2s"], displayAnswer:"2♠",
+  rule:"2 MJ: min 3'lü, 8-10 TP (yapıcı). 11+ veya blokatif 3-5 HP dengesiz olsaydı sıçrama olurdu.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — ilk cevaplar",table:1,row:4},
+  status:"verified", tags:["clean","raise","contrast"]
+},
+{
+  id:"clean-trial-3yr-response",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"2♠"},{seat:"E",call:null},
+      {seat:"S",call:"3♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"dengeli",tp:"9-10 TP",dağılım:"♦'de değer yok"},
+    context:"2♠'den sonra açan 3♦ trial-bid yaptı. Dengeli, 9-10 TP, ♦'de değer yok."
+  },
+  acceptedAnswers:["3s"], displayAnswer:"3♠",
+  rule:"Trial-bid'e cevap: renğe dönüş = daveti reddet, dengeliyim.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — 2 MJ sonra",table:3,row:10},
+  status:"verified", tags:["clean","trial"]
+},
+{
+  id:"clean-trial-3yr-value",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"PAS"},{seat:"N",call:"2♥"},{seat:"E",call:null},
+      {seat:"S",call:"3♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"dengesiz",tp:"9-10 TP",extra:"♦'de değerler var"},
+    context:"2♥'den sonra açan 3♦ trial-bid yaptı. 9-10 TP, dengesiz, ♦'de değerler var."
+  },
+  acceptedAnswers:["3d"], displayAnswer:"3♦",
+  rule:"Trial-bid'e cevap: 9-10 TP ve YR'de değerler var → rengi tekrar (3♦).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — 2 MJ sonra",table:3,row:10},
+  status:"verified", tags:["clean","trial"]
+},
+{
+  id:"clean-trial-contrast",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"2♠"},{seat:"E",call:null},
+      {seat:"S",call:"3♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"8 TP",dağılım:"4'lü ♠ + dengesiz el"},
+    context:"2♠'den sonra açan 3♦ trial. 8 TP, 4'lü ♠ tutuş ve dengesiz el."
+  },
+  acceptedAnswers:["4s"], displayAnswer:"4♠",
+  rule:"Trial: 8 TP + 4'lü tutuş + dengesiz el (veya 9-10 TP) → 4 MJ. (Dengeli 8 TP olsaydı 3 MJ dönerdi.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — 2 MJ sonra",table:3,row:10},
+  status:"verified", tags:["clean","trial","contrast"]
+},
+{
+  id:"clean-trial-3yr-meaning",
+  deck:"1MJ-CLEAN", kind:"meaning", grading:"self",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"2♠"},{seat:"E",call:null},
+      {seat:"S",call:"3♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    context:"Ortak 1♠ açtı, sen 2♠ dedin; ortak 3♦ okudu. Bu ne anlama gelir?"
+  },
+  displayAnswer:"YR'den durum sorusu (trial-bid)",
+  rule:"2 MJ'den sonra 3 YR = YR'den durum sorusu (trial-bid). Cevap: 3 MJ (dengeli/reddet), 3 YR (değer var), 4 YR (splinter, boş/AXX), 4 MJ (beğenmedim).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — 2 MJ sonra",table:3,row:8},
+  status:"verified", tags:["clean","trial","meaning"]
+},
+{
+  id:"clean-1sa-2nt-balance",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"PAS"},{seat:"N",call:"1 SA"},{seat:"E",call:null},
+      {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"S",
+    hand:{strength:"18-19 HP",dağılım:"dengeli"},
+    context:"Ortak 1♥'ye 1 SA. Açan: 18-19 HP, dengeli el. (6'lı major değil, tutuş yok.)"
+  },
+  acceptedAnswers:["2nt"], displayAnswer:"2 SA",
+  rule:"2 SA: 18-19 HP dengeli el (sıçrama olmalı). (16-17 HP ile 1 SA açardık.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — 1 SA cevabı (1♥)",table:9,row:7},
+  status:"verified", tags:["clean","opener","notrump"]
+},
+{
+  id:"clean-1sa-3h-quality",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♥"},{seat:"W",call:"PAS"},{seat:"N",call:"1 SA"},{seat:"E",call:null},
+      {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"S",
+    hand:{strength:"15-17 HP","6'lı":"♥ (kaliteli)"},
+    context:"Ortak 1♥'ye 1 SA. Açan: 15-17 HP, 6'lı kaliteli ♥, tutuş var."
+  },
+  acceptedAnswers:["3h"], displayAnswer:"3♥",
+  rule:"3 MJ: 15-17 HP, 6'lı major kaliteli olmalı (tutuş var).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — 1 SA cevabı (1♥)",table:9,row:7},
+  status:"verified", tags:["clean","opener"]
+},
+{
+  id:"clean-21-2nt-relay",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"2♦"},{seat:"E",call:null},
+      {seat:"S",call:"2♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"12+ HP"},
+    context:"1♠-2♦-2♠'den sonra: 12+ HP, eli anlatmaya devam etmen gerekiyor."
+  },
+  acceptedAnswers:["2nt"], displayAnswer:"2 SA",
+  rule:"2/1'den sonra 2 SA = 12+ HP; relay — elini tanımlamaya devam et.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — 2/1 devamı",table:10,row:6},
+  status:"verified", tags:["clean","2over1"]
+},
+{
+  id:"clean-21-2nt-vs-3nt",
+  deck:"1MJ-CLEAN", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[
+      {seat:"S",call:"1♠"},{seat:"W",call:"PAS"},{seat:"N",call:"2♦"},{seat:"E",call:null},
+      {seat:"S",call:"2♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}
+    ],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"11-12 HP","6'lı":"♦"},
+    context:"1♠-2♦-2♠'den sonra: 11-12 HP, 6'lı ♦, 12+ yok."
+  },
+  acceptedAnswers:["3d"], displayAnswer:"3♦",
+  rule:"3♦: 11-12 HP, 6'lı ♦ (2 SA olsaydı 12+ HP demekti).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — 2/1 devamı",table:10,row:6},
+  status:"verified", tags:["clean","2over1","contrast"]
+}
+);
+
 /* ===== M4: APP LOGIC ===== */
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = "bridge-drill.progress.v1";
-const DECKS = ["1MJ-OA", "1MJ-CLEAN", "LEADS"];
+const DECKS = ["1MJ-OA", "1MJ-CLEAN", "LEADS", "1NT", "MINORS"];
 const SEATS_TR = { S:"Güney", W:"Batı", N:"Kuzey", E:"Doğu" };
 const SEAT_PARTNER = { S:"N", N:"S", W:"E", E:"W" };
 const SEAT_LHO = { S:"W", W:"N", N:"E", E:"S" }; // left-hand opponent
