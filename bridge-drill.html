@@ -196,7 +196,7 @@ footer{margin-top:24px;font-size:12px;color:var(--muted);text-align:center}
 </div>
 <script>
 "use strict";
-/* ===== M3: CARD DATA (40 verified: 10 each 1MJ-OA / 1MJ-CLEAN base / LEADS, +10 extra 1MJ-CLEAN) ===== */
+/* ===== M3: CARD DATA (80 verified: 1MJ-OA 10 / 1MJ-CLEAN 20 / 1NT 20 / MINORS 20 / LEADS 10) ===== */
 const CARDS = [
 /* ---------- DECK 1: 1MJ-OA (1 major opened, next seat doubled) — Table 7 ---------- */
 {
@@ -792,6 +792,602 @@ CARDS.push(
   rule:"3♦: 11-12 HP, 6'lı ♦ (2 SA olsaydı 12+ HP demekti).",
   source:{file:"BricS3Y4E_vT.html",section:"1 MAJÖR AÇILIŞI — 2/1 devamı",table:10,row:6},
   status:"verified", tags:["clean","2over1","contrast"]
+}
+);
+
+/* ===== M3 expansion: +20 cards 1NT (1 SA opening) — Tables 20-27 ===== */
+CARDS.push(
+{
+  id:"nt-1nt-pas",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"0-7 HP"},
+    context:"Ortak 1 SA açtı, Batı pas geçti. 0-7 HP elin var."
+  },
+  acceptedAnswers:["pas"], displayAnswer:"PAS",
+  rule:"0-7 HP: 1 SA'ya pas.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI",table:20,row:2},
+  status:"verified", tags:["1nt","weak"]
+},
+{
+  id:"nt-1nt-2s-minmax",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"8-9 HP",dağılım:"dengeli"},
+    context:"Ortak 1 SA açtı. 8-9 HP, dengeli el — 3 SA davet etmek istiyorsun."
+  },
+  acceptedAnswers:["2s"], displayAnswer:"2♠",
+  rule:"2♠ = MIN-MAKS sorusu; 8-9 HP ile 3 SA davetini buradan yapıyoruz.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI",table:20,row:3},
+  status:"verified", tags:["1nt","minmax"]
+},
+{
+  id:"nt-1nt-2nt-5mj-ask",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"10+ HP",extra:"5'lü major"},
+    context:"Ortak 1 SA açtı. 10+ HP ve 5'lü major var."
+  },
+  acceptedAnswers:["2nt"], displayAnswer:"2 SA",
+  rule:"2 SA = 10+ HP 5'lü major sorusu — zone forcing (dağılıma göre 8-9 olabilir).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — 5'li major sorusu",table:21,row:6},
+  status:"verified", tags:["1nt","5mj"]
+},
+{
+  id:"nt-1nt-2c-stayman",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"8+ HP",extra:"4'lü major arama"},
+    context:"Ortak 1 SA açtı. 8+ HP, 4'lü major aramak istiyorsun."
+  },
+  acceptedAnswers:["2c"], displayAnswer:"2♣",
+  rule:"2♣ = 8+ HP Stayman (4'lü major sorusu).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — STAYMAN",table:22,row:3},
+  status:"verified", tags:["1nt","stayman"]
+},
+{
+  id:"nt-stayman-2h-4h",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♣"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{support:"4'lü ♥"},
+    context:"Ortak 1 SA'ya 2♣ Stayman. Sen açansın, 4'lü ♥'in var (♠ yok)."
+  },
+  acceptedAnswers:["2h"], displayAnswer:"2♥",
+  rule:"Stayman cevabı (açan): 4'lü major yok → 2♦ / 4'lü ♥ → 2♥ (ikisi de 4'lü ise ♥ okunur).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — STAYMAN",table:22,row:5},
+  status:"verified", tags:["1nt","stayman","opener"]
+},
+{
+  id:"nt-stayman-2s-4s",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♣"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{support:"4'lü ♠",extra:"4'lü ♥ yok"},
+    context:"Ortak 1 SA'ya 2♣ Stayman. Sen açansın, 4'lü ♠, 4'lü ♥ yok."
+  },
+  acceptedAnswers:["2s"], displayAnswer:"2♠",
+  rule:"Stayman cevabı (açan): 4'lü ♠ → 2♠.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — STAYMAN",table:22,row:5},
+  status:"verified", tags:["1nt","stayman","opener"]
+},
+{
+  id:"nt-stayman-3sa-15",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♣"},{seat:"E",call:null},
+            {seat:"S",call:"2♥"},{seat:"W",call:"PAS"},{seat:"N",call:"2 SA"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{strength:"15 HP",extra:"5'lü minor yok, 4'lü ♠ yok"},
+    context:"1 SA-2♣-2♥-2 SA. Sen açansın: 15 HP, 5'lü minor yok, 4'lü ♠ yok."
+  },
+  acceptedAnswers:["3nt"], displayAnswer:"3 SA",
+  rule:"Stayman'de 2 SA'dan sonra (açan): 15 HP, 5'lü minor + 4'lü ♠ yok → 3 SA. (4'lü ♠ → 3♠, 5'lü minor → 4♠.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — STAYMAN",table:22,row:15},
+  status:"verified", tags:["1nt","stayman","opener"]
+},
+{
+  id:"nt-stayman-4sa-quant",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♣"},{seat:"E",call:null},
+            {seat:"S",call:"2♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"15-16 HP"},
+    context:"Ortak 1 SA'ya 2♣, ortak 2♦ (4'lü major yok). Sen 15-16 HP."
+  },
+  acceptedAnswers:["4nt"], displayAnswer:"4 SA",
+  rule:"Stayman'de 2♦'den sonra: 15-16 HP → 4 SA (quantitative davet).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — STAYMAN",table:22,row:7},
+  status:"verified", tags:["1nt","stayman","quant"]
+},
+{
+  id:"nt-stayman-4c-keycard",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♣"},{seat:"E",call:null},
+            {seat:"S",call:"2♥"},{seat:"W",call:"PAS"},{seat:"N",call:"4♣"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{strength:"15-16 HP",extra:"4'lü ♥ tutuş",keycard:"1 keycard"},
+    context:"Ortak 4♣ keycard sorusu. Sen açan: 15-16 HP, 4'lü ♥, 1 keycard."
+  },
+  acceptedAnswers:["4d"], displayAnswer:"4♦",
+  rule:"Keycard cevabı: 4♦ = 1-4 keycard. (4♥ = 0-3, 4♠ = 2-5 koz damı yok, 4 SA = 2-5 koz damı var.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — STAYMAN",table:22,row:23},
+  status:"verified", tags:["1nt","stayman","keycard"]
+},
+{
+  id:"nt-5mj-3h-5h",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2 SA"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{extra:"5'lü ♥"},
+    context:"Ortak 2 SA (5'lü major sorusu). Sen açansın, 5'lü ♥'in var."
+  },
+  acceptedAnswers:["3h"], displayAnswer:"3♥",
+  rule:"5'lü major sorusuna cevap: 3♣ = 5'lü yok / 3♥ = 5'lü ♥ / 3♠ = 5'lü ♠.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — 5'li major sorusu",table:21,row:8},
+  status:"verified", tags:["1nt","5mj","opener"]
+},
+{
+  id:"nt-5mj-3c-none",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2 SA"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{extra:"5'lü major yok"},
+    context:"Ortak 2 SA (5'lü major sorusu). Sen açansın, 5'lü major yok."
+  },
+  acceptedAnswers:["3c"], displayAnswer:"3♣",
+  rule:"5'lü major yok → 3♣.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — 5'li major sorusu",table:21,row:8},
+  status:"verified", tags:["1nt","5mj","opener"]
+},
+{
+  id:"nt-transfer-2d-5h",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5'lü ♥ (veya 6'lı)"},
+    context:"Ortak 1 SA açtı. 5+♥'in var (zayıf el)."
+  },
+  acceptedAnswers:["2d"], displayAnswer:"2♦",
+  rule:"Jacoby transfer: 5'lü ♥ için 2♦ oku (ortak 2♥'e transfer eder).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — JACOBY TRANSFER",table:23,row:2},
+  status:"verified", tags:["1nt","transfer"]
+},
+{
+  id:"nt-transfer-2h-5s",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5'lü ♠ (veya 6'lı)"},
+    context:"Ortak 1 SA açtı. 5+♠'in var (zayıf el)."
+  },
+  acceptedAnswers:["2h"], displayAnswer:"2♥",
+  rule:"Jacoby transfer: 5'lü ♠ için 2♥ oku (ortak 2♠'e transfer eder).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — JACOBY TRANSFER",table:23,row:2},
+  status:"verified", tags:["1nt","transfer"]
+},
+{
+  id:"nt-transfer-op-pas",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♦"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{strength:"15 HP",support:"2'lü ♥"},
+    context:"Ortak 2♦ (5'lü ♥ transferi). Sen açan: 15 HP, 2'lü ♥ tutuş."
+  },
+  acceptedAnswers:["pas"], displayAnswer:"PAS",
+  rule:"Transfer sonrası (açan): 15 HP, 2'lü tutuş → PAS. (16-17 HP → 3 SA.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — JACOBY TRANSFER",table:23,row:8},
+  status:"verified", tags:["1nt","transfer","opener"]
+},
+{
+  id:"nt-transfer-weak-pas",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♥"},{seat:"E",call:null},
+            {seat:"S",call:"2♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"0-7 HP",suit:"5'lü ♠"},
+    context:"Ortak 1 SA'ya 2♥ (5'lü ♠ transferi), ortak 2♠ kabul etti. Sen 0-7 HP."
+  },
+  acceptedAnswers:["pas"], displayAnswer:"PAS",
+  rule:"0-7 HP: 5'lüye transfer, sonra PAS. (8-9 → 2 SA davet, 10-14 → 3 SA.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — JACOBY TRANSFER",table:23,row:5},
+  status:"verified", tags:["1nt","transfer"]
+},
+{
+  id:"nt-smolen-show-5",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♣"},{seat:"E",call:null},
+            {seat:"S",call:"2♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"7-8 HP",suit:"5'lü ♥"},
+    context:"1 SA-2♣-2♦ (4'lü major yok). 7-8 HP, 5'lü ♥. 5'liliğini göstermen gerekiyor."
+  },
+  acceptedAnswers:["2h"], displayAnswer:"2♥",
+  rule:"2♦'ye 5'liliği göster: 2♥/2♠ = SMOLEN (7-8 HP). Sonra: 2 SA (min, renk uyumu yok) / 3♥/♠ (davet) / 4♥/♠ (max puan).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — SMOLEN",table:24,row:5},
+  status:"verified", tags:["1nt","smolen"]
+},
+{
+  id:"nt-smolen-3h-invite",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♣"},{seat:"E",call:null},
+            {seat:"S",call:"2♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"7-8 HP",suit:"5'lü ♥"},
+    context:"1 SA-2♣-2♦. 7-8 HP, 5'lü ♥ — davet eli, renk uyumu yok demiyorsun."
+  },
+  acceptedAnswers:["3h"], displayAnswer:"3♥",
+  rule:"Smolen'de 5'liliği (2♥/2♠) gösterdikten sonra: 3♥/3♠ = davet. (2 SA = min, renk uyumu yok; 4♥/4♠ = max puan.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — SMOLEN",table:24,row:6},
+  status:"verified", tags:["1nt","smolen"]
+},
+{
+  id:"nt-texas-4d",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"0-8 HP",suit:"6'lı ♥"},
+    context:"Ortak 1 SA açtı. 0-8 HP, 6'lı ♥ — slümle ilgin yok, sadece oyna."
+  },
+  acceptedAnswers:["4d"], displayAnswer:"4♦",
+  rule:"Texas transfer: 4♦ → ortak 4♥'e, 4♥ → ortak 4♠'e transfer eder.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — TEXAS TRANSFER",table:27,row:4},
+  status:"verified", tags:["1nt","texas"]
+},
+{
+  id:"nt-texas-4sa-14plus",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"4♥"},{seat:"E",call:null},
+            {seat:"S",call:"4♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"14+ HP",suit:"6'lı ♠"},
+    context:"6'lı ♠, 14+ HP. Texas ile ortak 4♠'e transfer etti."
+  },
+  acceptedAnswers:["4nt"], displayAnswer:"4 SA",
+  rule:"Texas'tan sonra: 10-13 TP → PAS; 14+ HP (veya 13-14 + singleton) → 4 SA.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — TEXAS TRANSFER",table:27,row:5},
+  status:"verified", tags:["1nt","texas"]
+},
+{
+  id:"nt-transfer-10plus-3mn",
+  deck:"1NT", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"2♥"},{seat:"E",call:null},
+            {seat:"S",call:"2♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"10+ HP",suit:"5'lü ♠",extra:"bir minor'da kısalık"},
+    context:"1 SA-2♥-2♠. 10+ HP, 5'lü ♠ — kısa rengini göstereceksin."
+  },
+  acceptedAnswers:["3c"], displayAnswer:"3♣",
+  rule:"10+ HP: 5'lüye transfer (2♥), ortak kabul edince 3 MN = kısa renk göster (örn. 3♣ = ♣ kısa).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 SA AÇILIŞI — JACOBY TRANSFER",table:26,row:3},
+  status:"verified", tags:["1nt","transfer","strong"]
+}
+);
+
+/* ===== M3 expansion: +20 cards MINORS (1 MİNÖR açılışı) — Tables 11-19 ===== */
+CARDS.push(
+{
+  id:"mn-1mj-4card",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♣"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"4'lü ♥",strength:"6+ HP"},
+    context:"Ortak 1♣ açtı, Batı pas. 4'lü ♥'in var, 6+ HP."
+  },
+  acceptedAnswers:["2h"], displayAnswer:"2♥",
+  rule:"1 MİNÖR'e 1 MJ cevabı: 4'lü major, 6+ HP. (Renk sırasıyla okunur.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI",table:11,row:2},
+  status:"verified", tags:["minor","response"]
+},
+{
+  id:"mn-raise-2mj",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♣"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{support:"4'lü ♥",strength:"12-15 HP"},
+    context:"1♣-1♥-PAS. Sen açan, 4'lü ♥ tutuş, 12-15 HP."
+  },
+  acceptedAnswers:["2h"], displayAnswer:"2♥",
+  rule:"Yükseltme: 4'lü tutuş, 12-15 HP → 2 MJ. (16-17 HP → 3 MJ, 18-19 dengeli → 2 SA.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI",table:11,row:3},
+  status:"verified", tags:["minor","opener"]
+},
+{
+  id:"mn-raise-3mj",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{support:"4'lü ♥",strength:"16-17 HP"},
+    context:"1♦-1♥-PAS. Sen açan, 4'lü ♥ tutuş, 16-17 HP."
+  },
+  acceptedAnswers:["3h"], displayAnswer:"3♥",
+  rule:"Yükseltme: 4'lü tutuş, 16-17 HP → 3 MJ. (12-15 → 2 MJ.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI",table:11,row:3},
+  status:"verified", tags:["minor","opener"]
+},
+{
+  id:"mn-4yr-splinter",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{support:"4'lü ♥",extra:"♣ singleton/void"},
+    context:"1♦-1♥-PAS. Sen açan, 4'lü ♥, ♣'de single/void."
+  },
+  acceptedAnswers:["4c"], displayAnswer:"4♣",
+  rule:"4 YR = SPLINTER: tutuş var, yan minor'da single/void. (Koz = major.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI",table:11,row:3},
+  status:"verified", tags:["minor","opener","splinter"]
+},
+{
+  id:"mn-walsh-1mj",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♣"},{seat:"W",call:"PAS"},{seat:"N",call:"1♦"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{suit:"4'lü ♥",extra:"dengesiz el"},
+    context:"1♣-1♦ (Walsh). Sen açan: 4'lü major + dengesiz el. (Dengeli el olsaydı 1 SA olacaktı.)"
+  },
+  acceptedAnswers:["1h"], displayAnswer:"1♥",
+  rule:"Walsh: açanın 1 MJ = dengesiz el, 4'lü major var. (1 SA = dengeli, 4'lü major olabilir; Two-Way geçerli.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — WALSH",table:11,row:12},
+  status:"verified", tags:["minor","walsh","opener"]
+},
+{
+  id:"mn-two-way-2c",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"1 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5'lü ♥",strength:"davet eli"},
+    context:"1♦-1♥-1 SA (Two-Way check-back). Sen cevapçı, 5'lü ♥, davet eli (veya 2♦ oyna)."
+  },
+  acceptedAnswers:["2c"], displayAnswer:"2♣",
+  rule:"2♣ = RELAY Two-Way check-back: davet eli veya 2♦ oyna istediğin el. (12+ HP olsaydı 2♦.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — TWO WAY CHECK-BACK",table:12,row:3},
+  status:"verified", tags:["minor","twoway"]
+},
+{
+  id:"mn-ingerman-2nt",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♣"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"2♠"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5'lü ♥ + 4'lü ♠",strength:"5-7 HP"},
+    context:"1♣-1♥-2♠ (açan yeni renk). Sen cevapçı: 5'lü ♥ + 4'lü ♠, 5-7 HP min el."
+  },
+  acceptedAnswers:["2nt"], displayAnswer:"2 SA",
+  rule:"INGBERMAN: 2 SA = 5-7 HP min el (dijital tüm cevaplar 8+ HP).",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — TWO WAY / INGBERMAN",table:13,row:5},
+  status:"verified", tags:["minor","ingerman"]
+},
+{
+  id:"mn-reverse-2s",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{suit:"5♦ + 4♠",strength:"18-20 HP"},
+    context:"1♦-1♥-PAS. Sen açan: 5♦ + 4♠ (min), 18-20 HP. Yeni renkte sıçrama."
+  },
+  acceptedAnswers:["2s"], displayAnswer:"2♠",
+  rule:"Yeni renkte sıçrama = ZONE FORCING: 18-20 HP, min 5♦ + 4♠.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — devam",table:14,row:10},
+  status:"verified", tags:["minor","opener","jump"]
+},
+{
+  id:"mn-4th-suit-2c",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{suit:"5♦ + 4♣",strength:"12-17 HP"},
+    context:"1♦-1♥-PAS. Sen açan: 5♦ + 4♣, 12-17 HP. 4. renk (♣) göstereceksin."
+  },
+  acceptedAnswers:["2c"], displayAnswer:"2♣",
+  rule:"2♣ = 12-17 HP, min 5♦ + 4♣ dağılım (4. renk). Sonra: 11+ HP 4. renk sorusu, zone forcing.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — devam",table:14,row:12},
+  status:"verified", tags:["minor","opener"]
+},
+{
+  id:"mn-4th-jump-55",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"2♣"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5+5 dağılım"},
+    context:"1♦-1♥-2♣ (4. renk). 5+5 dağılımın var."
+  },
+  acceptedAnswers:["3s"], displayAnswer:"3♠",
+  rule:"4. renkte sıçrama = NATÜREL, SORU DEĞİL, min 5+5 dağılım. (2 SA = 12-14 + ♠ stopper yok, vs.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — devam",table:14,row:21},
+  status:"verified", tags:["minor"]
+},
+{
+  id:"mn-inverted-2c",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"12+ HP",suit:"5+lü ♣",extra:"4'lü major yok"},
+    context:"Ortak 1♦ açtı. 12+ HP, 5+lü ♣, 4'lü major yok."
+  },
+  acceptedAnswers:["2c"], displayAnswer:"2♣",
+  rule:"INVERTED MINOR (zone forcing): 12+ HP, 4'lü major yok, min 5'lü tutuş. (4'lü major olsaydı önce 1 MJ okunurdu.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — inverted",table:15,row:4},
+  status:"verified", tags:["minor","inverted"]
+},
+{
+  id:"mn-inverted-3nt-bal",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"2♣"},{seat:"E",call:null},
+            {seat:"S",call:"2 SA"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{strength:"12-17 HP",dağılım:"dengeli"},
+    context:"1♦-2♣ (inverted)-2 SA. Sen cevapçı, 12-17 HP dengeli el."
+  },
+  acceptedAnswers:["3nt"], displayAnswer:"3 SA",
+  rule:"Inverted minor'dan sonra: 3 SA = 12-17 HP dengeli el. (3 MN = min 10-11, 3 YR = short single/void 12+.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — inverted",table:15,row:8},
+  status:"verified", tags:["minor","inverted"]
+},
+{
+  id:"mn-preempt-3mn",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♣"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"6'lı ♦",strength:"4-5 HP"},
+    context:"Ortak 1♣ açtı. 6'lı ♦, 4-5 HP zayıf el."
+  },
+  acceptedAnswers:["3d"], displayAnswer:"3♦",
+  rule:"Zayıf 4-5 HP, 5-6'lı minor → preemptif 3 MN.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI",table:15,row:2},
+  status:"verified", tags:["minor","preempt"]
+},
+{
+  id:"mn-jump-inv-2d",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♣"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5'lü ♦",strength:"10-11 HP",extra:"dengesiz"},
+    context:"Ortak 1♣ açtı. 5'lü ♦, 10-11 HP, dengesiz el."
+  },
+  acceptedAnswers:["2d"], displayAnswer:"2♦",
+  rule:"Yeni MN'de jump (1♣/2♦): 10-11 HP, min 5+ MN, dengesiz el — DAVET.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI",table:15,row:3},
+  status:"verified", tags:["minor","jump"]
+},
+{
+  id:"mn-jump-inv-3c",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5'lü ♣",strength:"10-11 HP",extra:"dengesiz"},
+    context:"Ortak 1♦ açtı. 5'lü ♣, 10-11 HP, dengesiz el."
+  },
+  acceptedAnswers:["3c"], displayAnswer:"3♣",
+  rule:"Yeni MN'de jump (1♦/3♣): 10-11 HP, min 5+ MN, dengesiz el — DAVET.",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI",table:15,row:3},
+  status:"verified", tags:["minor","jump"]
+},
+{
+  id:"mn-opp-dbl-2sa",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"X"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5-6'lı ♦",strength:"4-5 HP"},
+    context:"Ortak 1♦ açtı, rakip DBL. 5-6'lı ♦, 4-5 HP blokatif el."
+  },
+  acceptedAnswers:["2nt"], displayAnswer:"2 SA",
+  rule:"Rakip DBL'den sonra: 2 SA = blokatif 4-5 HP, 5-6 MN. (3 MN = 7-8 HP 5'lü tutuş; RDBL = 12+ HP GF.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — rakip DBL",table:16,row:2},
+  status:"verified", tags:["minor","competitive"]
+},
+{
+  id:"mn-opp-dbl-rdbl",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"X"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5'lü ♦",strength:"12+ HP"},
+    context:"Ortak 1♦ açtı, rakip DBL. 12+ HP, 5'lü ♦ — game forcing."
+  },
+  acceptedAnswers:["rdbl"], displayAnswer:"RDBL",
+  rule:"RDBL = 12+ HP, game forcing; tutuşu bir sonraki konuşmada göster. (2 SA = blokatif 4-5 HP.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — rakip DBL",table:16,row:2},
+  status:"verified", tags:["minor","competitive"]
+},
+{
+  id:"mn-opp-1sa-2c",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"1 SA"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5+4 major",strength:"2-8 HP"},
+    context:"Ortak 1♦ açtı, rakip 1 SA. 5+4 major, 2-8 HP."
+  },
+  acceptedAnswers:["2c"], displayAnswer:"2♣",
+  rule:"Rakip 1 SA: 2♣ = majorlar (min 5+4), 2-8 HP. (9+ HP ceza için DBL. 2♦ = majorlar eşit, sen seç.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — rakip 1 SA",table:18,row:2},
+  status:"verified", tags:["minor","competitive"]
+},
+{
+  id:"mn-3rd-2nt",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"2♣"},{seat:"W",call:"PAS"},{seat:"N",call:"2♠"},{seat:"E",call:null},
+            {seat:"S",call:"?"},{seat:"W",call:null},{seat:"N",call:null},{seat:"E",call:null}],
+    dealer:"S", userSeat:"S",
+    hand:{strength:"min el"},
+    context:"1♦-1♥-2♣-2♠ (3. renk). Sen açan, min el — davet yok."
+  },
+  acceptedAnswers:["2nt"], displayAnswer:"2 SA",
+  rule:"3. renk konvansiyonu: açanın 2 SA = MIN cevap, cevapçı pas geçebilir. (2 MJ = 3'lü tutuş min, 3 MJ = 3'lü tutuş max, 4. renk = maximum.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — 3. RENK KONVANSYONU",table:19,row:6},
+  status:"verified", tags:["minor","thirdsuit","opener"]
+},
+{
+  id:"mn-3rd-splinter",
+  deck:"MINORS", kind:"bid", grading:"exact",
+  prompt:{
+    auction:[{seat:"S",call:"1♦"},{seat:"W",call:"PAS"},{seat:"N",call:"1♥"},{seat:"E",call:null},
+            {seat:"S",call:"2♣"},{seat:"W",call:"PAS"},{seat:"N",call:"?"},{seat:"E",call:null}],
+    dealer:"S", userSeat:"N",
+    hand:{suit:"5+lü ♦",extra:"♠'de kısalık (single/void)"},
+    context:"1♦-1♥-2♣ (3. renk). 5+lü ♦ (min 4'lü MN tutuş), 3. renkte (♠) kısalığın var."
+  },
+  acceptedAnswers:["3s"], displayAnswer:"3♠",
+  rule:"Sıçrayarak 3. renk = SPLINTER: MN'de min 4'lü tutuş, 3. renkte kısalık. (Düz 3. renk = zone forcing.)",
+  source:{file:"BricS3Y4E_vT.html",section:"1 MİNÖR AÇILIŞI — 3. RENK KONVANSYONU",table:19,row:11},
+  status:"verified", tags:["minor","thirdsuit","splinter"]
 }
 );
 
